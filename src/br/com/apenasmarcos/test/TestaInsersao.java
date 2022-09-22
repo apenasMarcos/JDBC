@@ -5,12 +5,22 @@ import java.sql.*;
 public class TestaInsersao {
 
     public static void main(String[] args) throws SQLException {
-        String nome = "";
-        String descricao = "";
 
         Connection connection = new ConnectionFactory().recuperarConexao();
-        PreparedStatement statement = connection.prepareStatement("INSERT INTO  produto (nome,descricao) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+        connection.setAutoCommit(false);
+        try{
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO  produto (nome,descricao) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+            adicionarItem("", "", statement);
+            connection.commit();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Rollback executado");
+            connection.rollback();
+        }
+    }
 
+    private static void adicionarItem(String nome, String descricao, PreparedStatement statement) throws SQLException {
         statement.setString(1, nome);
         statement.setString(2, descricao);
         ResultSet resultSet = statement.getGeneratedKeys();
